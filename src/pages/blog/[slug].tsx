@@ -10,6 +10,10 @@ import { sanityClient, urlFor } from "@/lib/sanity";
 import { PortableText, PortableTextComponents } from "@portabletext/react";
 import Container from "@/shared/ui/container/Container";
 
+import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
+// @ts-ignore
+import 'highlight.js/styles/github-dark.css'; 
 // Import your newly created TechCommentForm component
 import { TechCommentForm } from "@/shared/ui/forms/CommentForm";
 
@@ -365,10 +369,75 @@ export default function Post({ post }: PostProps) {
               </div>
             )}
 
-            {/* Post Content */}
-            <div className="mt-10">
-              <PortableText value={post.body} components={components} />
-            </div>
+          {/* Post Content */}
+<div className="mt-10 prose prose-invert max-w-none">
+  <ReactMarkdown
+    rehypePlugins={[rehypeHighlight]}
+    components={{
+      h1: ({ children }) => (
+        <h1 className="text-3xl md:text-4xl font-extrabold text-white mt-12 mb-6 font-sans">
+          {children}
+        </h1>
+      ),
+      h2: ({ children }) => (
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white mt-12 mb-4 font-sans">
+          {children}
+        </h2>
+      ),
+      h3: ({ children }) => (
+        <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white mt-8 mb-3 font-sans">
+          {children}
+        </h3>
+      ),
+      p: ({ children }) => (
+        <p className="text-neutral-300 font-light leading-relaxed mb-6 text-[18px] md:text-[20px]">
+          {children}
+        </p>
+      ),
+      ul: ({ children }) => (
+        <ul className="list-disc pl-6 my-6 space-y-2 text-neutral-300 font-light text-base md:text-lg">
+          {children}
+        </ul>
+      ),
+      ol: ({ children }) => (
+        <ol className="list-decimal pl-6 my-6 space-y-3 text-neutral-300 font-light text-base md:text-lg">
+          {children}
+        </ol>
+      ),
+      li: ({ children }) => (
+        <li className="marker:text-cyan-500">{children}</li>
+      ),
+      blockquote: ({ children }) => (
+        <blockquote className="border-l-2 border-cyan-400 pl-5 italic text-neutral-400 my-8 bg-neutral-950/40 py-2 rounded-r-lg">
+          {children}
+        </blockquote>
+      ),
+      code({ node, inline, className, children, ...props }: any) {
+        if (inline) {
+          return (
+            <code
+              className="px-1.5 py-0.5 rounded bg-neutral-900 text-cyan-400 border border-neutral-800 font-mono text-sm"
+              {...props}
+            >
+              {children}
+            </code>
+          );
+        }
+        return (
+          <div className="relative my-8 rounded-xl overflow-hidden bg-neutral-950 border border-neutral-800 shadow-2xl font-mono text-sm">
+            <pre className="p-4 overflow-x-auto text-neutral-200">
+              <code className={className} {...props}>
+                {children}
+              </code>
+            </pre>
+          </div>
+        );
+      },
+    }}
+  >
+    {typeof post.body === "string" ? post.body : ""}
+  </ReactMarkdown>
+</div>
 
             {/* Comments Section */}
             <section className="mt-16 pt-12 border-t border-neutral-900">
