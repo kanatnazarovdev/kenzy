@@ -89,30 +89,7 @@ export const postType = defineType({
     defineField({
       name: "body",
       title: "Content Body",
-      type: "text",
-      of: [
-        { type: "block" },
-        { type: "code" },
-        {
-          type: "image",
-          options: { hotspot: true },
-          fields: [
-            defineField({
-              name: "alt",
-              title: "Alternative Text (SEO)",
-              type: "string",
-              description: "Important for accessibility and SEO screens.",
-            }),
-            defineField({
-              name: "caption",
-              title: "Caption",
-              type: "string",
-              description:
-                "This text will render cleanly right under your post image.",
-            }),
-          ],
-        },
-      ],
+      type: "text"
     }),
   ],
 });
