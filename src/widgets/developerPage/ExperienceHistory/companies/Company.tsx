@@ -14,15 +14,21 @@ import postgres from "../../../../../public/images/skills/postgres.png";
 import git from "../../../../../public/images/skills/git.png";
 import next from "../../../../../public/images/skills/next.png";
 import ts from "../../../../../public/images/skills/ts.png";
-import framer from "../../../../../public/images/skills/framer.png";
-import jira from "../../../../../public/images/skills/jira.png";
-import mui from "../../../../../public/images/skills/mui.png";
 import mongo from "../../../../../public/images/skills/mongodb.svg";
-import fsd from "../../../../../public/images/skills/fsdPattern.jpg";
 import redis from "../../../../../public/images/skills/redis.svg";
-import angular from "../../../../../public/images/skills/angular.svg";
-import websockets from "../../../../../public/images/skills/websockets.svg";
 const companiesData = [
+  {
+    title: "Senior Frontend Engineer & Web Architect (Contract)",
+    company: "Holy Name Medical Center",
+    duration: "Sep 2026 - Present",
+    description: [
+      "Architected and deployed high-performance medical web applications using Next.js (App Router), TypeScript, and Tailwind CSS.",
+      "Engineered client-side workflows and custom frontend APIs connecting securely with enterprise EHR/EMR systems and scheduling portals[cite: 1].",
+      "Designed dynamic headless Sanity CMS schemas and frontend components, empowering the internal marketing team to build customized landing pages independently.",
+      "Lead frontend architecture, UI performance optimization, and code quality while serving as the technical liaison between internal marketing and offshore development teams[cite: 1]."
+    ],
+    icons: [next, ts, react, git],
+  },
   {
     title: "Senior Lead Web Developer & Technical Architect",
     company: "Fusion AI Agency / Enterprise Contracts",

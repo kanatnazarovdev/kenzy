@@ -1,36 +1,11 @@
 import { sanityClient, urlFor } from "@/lib/sanity";
 import Image from "next/image";
 import Link from "next/link";
-import { PortableText } from "@portabletext/react";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
-const components = {
-  types: {
-    image: ({ value }: { value: any }) => {
-      if (!value?.asset?._ref) return null;
 
-      return (
-        <div className="my-10 w-full flex flex-col items-center justify-center">
-          <div className="max-w-[240px] overflow-hidden w-full">
-            <Image
-              src={urlFor(value).url()}
-              alt={value.alt || "Post image"}
-              width={800}
-              height={500}
-              className="object-cover w-full h-auto rounded-lg"
-            />
-          </div>
-
-          {value.caption && (
-            <p className=" text-[11px] font-semibold tracking-widest  text-[#9A958C] max-w-[auto] text-center leading-relaxed italic">
-              {value.caption}
-            </p>
-          )}
-        </div>
-      );
-    },
-  },
-};
 // Component: Form to leave comments
 const CommentForm = ({ postId }: { postId: string }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -90,15 +65,15 @@ const CommentForm = ({ postId }: { postId: string }) => {
 
 export default function PostPage({ post }: { post: any }) {
   if (!post) return null;
-  console.log(post.excerpt);
+
   return (
     <article className="bg-[#FAF7F2] min-h-screen pb-32 pt-28">
       {/* Dynamic SEO Metadata */}
       <Head>
         <title>{post.title} | Kanat Nazarov</title>
-        <meta name="description" content={post.excerpt} />
+        <meta name="description" content={post.excerpt || ""} />
         <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.excerpt} />
+        <meta property="og:description" content={post.excerpt || ""} />
         <meta property="og:type" content="article" />
         {post.image && (
           <meta property="og:image" content={urlFor(post.image).url()} />
@@ -133,14 +108,16 @@ export default function PostPage({ post }: { post: any }) {
         <div className="flex flex-col items-center gap-4 text-[10px] uppercase font-bold tracking-[0.3em] text-[#9A958C]">
           <div className="flex items-center gap-4">
             <span>
-              {new Date(post.date).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
+              {post.date
+                ? new Date(post.date).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : ""}
             </span>
             <span>•</span>
-            <span>{post.readTime} MIN READ</span>
+            <span>{post.readTime || 3} MIN READ</span>
           </div>
           {post?.author && (
             <div className="flex items-center gap-2 mt-2">
@@ -162,7 +139,44 @@ export default function PostPage({ post }: { post: any }) {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 prose-xl prose-p:text-[18px] prose-p:font-medium prose-p:leading-8 text-[#5A564E]">
-        <PortableText value={post.body} components={components} />
+        {/* Render raw Markdown string into formatted HTML */}
+        <ReactMarkdown
+          rehypePlugins={[rehypeHighlight]}
+          components={{
+            h2: ({ children }) => (
+              <h2 className="text-2xl font-bold uppercase text-[#1C1A17] mt-10 mb-4">
+                {children}
+              </h2>
+            ),
+            h3: ({ children }) => (
+              <h3 className="text-xl font-bold text-[#1C1A17] mt-8 mb-3">
+                {children}
+              </h3>
+            ),
+            p: ({ children }) => (
+              <p className="text-[#5A564E] text-[18px] font-medium leading-8 mb-6">
+                {children}
+              </p>
+            ),
+            ul: ({ children }) => (
+              <ul className="list-disc pl-6 my-6 space-y-2 text-[#5A564E]">
+                {children}
+              </ul>
+            ),
+            ol: ({ children }) => (
+              <ol className="list-decimal pl-6 my-6 space-y-2 text-[#5A564E]">
+                {children}
+              </ol>
+            ),
+            blockquote: ({ children }) => (
+              <blockquote className="border-l-2 border-[#1C1A17] pl-4 italic text-[#9A958C] my-6">
+                {children}
+              </blockquote>
+            ),
+          }}
+        >
+          {post.body}
+        </ReactMarkdown>
 
         {/* Comments Section */}
         {post.comments && post.comments.length > 0 && (
@@ -205,29 +219,43 @@ export default function PostPage({ post }: { post: any }) {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = await sanityClient.fetch(
-    `*[_type == "post" && defined(slug.current) && category->title == "Lifestyle & Performance"].slug.current`,
+    `*[_type == "post" && defined(slug.current)].slug.current`
   );
   return {
     paths: slugs.map((slug: string) => ({ params: { slug } })),
     fallback: "blocking",
   };
 };
+
 export const getStaticProps: GetStaticProps = async ({ params, locale }) => {
   const lang = locale || "en";
 
   const post = await sanityClient.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
-      _id, title, excerpt, image, body, date, language,
+      _id, title, excerpt, image, body, content, date, language,
       "author": author->{name, "imageUrl": image.asset->url}, 
       "comments": *[_type == "comment" && post._ref == ^._id && approved == true],
-      "readTime": round(length(pt::text(body)) / 5 / 200),
-      // Filter previous/next by category AND language
-      "previous": *[_type == "post" && date < ^.date && category->title == "Lifestyle & Performance" && language == $lang] | order(date desc)[0]{"slug": slug.current},
-      "next": *[_type == "post" && date > ^.date && category->title == "Lifestyle & Performance" && language == $lang] | order(date asc)[0]{"slug": slug.current}
+      "previous": *[_type == "post" && date < ^.date && language == $lang] | order(date desc)[0]{"slug": slug.current},
+      "next": *[_type == "post" && date > ^.date && language == $lang] | order(date asc)[0]{"slug": slug.current}
     }`,
-    { slug: params?.slug, lang },
+    { slug: params?.slug, lang }
   );
 
   if (!post) return { notFound: true };
+
+  // Resolve body content across potential schema field names ('body' or 'content')
+  const rawBody =
+    typeof post.body === "string"
+      ? post.body
+      : typeof post.content === "string"
+      ? post.content
+      : "";
+
+  post.body = rawBody;
+
+  // Calculate dynamic reading time
+  const wordCount = rawBody.split(/\s+/).filter(Boolean).length;
+  post.readTime = Math.max(1, Math.round(wordCount / 200));
+
   return { props: { post }, revalidate: 60 };
 };

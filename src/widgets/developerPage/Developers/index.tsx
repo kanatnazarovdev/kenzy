@@ -349,13 +349,20 @@ const Developer = () => {
                         </a>
                         <span
                           className="w-8 h-8 rounded-lg bg-neutral-900/80 border border-neutral-800/30 flex items-center justify-center cursor-not-allowed select-none"
-                          title="LinkedIn under construction"
+                          title="LinkedIn"
+                        >
+                          <a
+                          href="https://www.linkedin.com/in/kanatnazarov/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-8 h-8 rounded-lg bg-neutral-900/80 border border-neutral-800/80 flex items-center justify-center transition-all hover:bg-neutral-800 hover:border-neutral-700"
                         >
                           <Image
-                            alt="LinkedIn under construction"
+                            alt="LinkedIn"
                             src={linkedin}
-                            className="w-4 h-4 opacity-20 grayscale"
+                            className="w-4 h-4 opacity-70 hover:opacity-100"
                           />
+                        </a>
                         </span>
                         <a
                           href="https://drive.google.com/file/d/1LUudYEypSjBSYhlfYSOqhyA6GRTmhv_n/view?usp=sharing"
