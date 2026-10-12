@@ -89,17 +89,18 @@ export default function PostPage({ post }: { post: any }) {
         </Link>
       </div>
 
-      {post.image && (
-        <div className="max-w-5xl mx-auto px-6 mb-16">
-          <Image
-            src={urlFor(post.image).url()}
-            alt={post.title}
-            width={1200}
-            height={600}
-            className="object-cover w-full"
-          />
-        </div>
-      )}
+   {post.image && post.image.asset && (
+  <div className="max-w-5xl mx-auto px-6 mb-16">
+    <Image
+      src={urlFor(post.image).width(1200).height(600).url()}
+      alt={post.title}
+      width={1200}
+      height={600}
+      className="object-cover w-full"
+      priority
+    />
+  </div>
+)}
 
       <div className="max-w-3xl mx-auto px-6 text-center mb-10">
         <h1 className="text-4xl uppercase font-bold text-[#1C1A17] mb-6">
@@ -243,7 +244,6 @@ export const getStaticProps: GetStaticProps = async ({ params, locale }) => {
 
   if (!post) return { notFound: true };
 
-  // Resolve body content across potential schema field names ('body' or 'content')
   const rawBody =
     typeof post.body === "string"
       ? post.body
@@ -253,7 +253,6 @@ export const getStaticProps: GetStaticProps = async ({ params, locale }) => {
 
   post.body = rawBody;
 
-  // Calculate dynamic reading time
   const wordCount = rawBody.split(/\s+/).filter(Boolean).length;
   post.readTime = Math.max(1, Math.round(wordCount / 200));
 

@@ -220,16 +220,18 @@ export default function LifestyleJournal({ lifestylePosts }: LifestyleProps) {
                 >
                   {/* Контейнер картинки с внутренним параллаксом */}
                   <div className="parallax-img-wrap aspect-[16/10] w-full bg-[#FAF7F2] mb-8 overflow-hidden relative border border-[#EFEBE3]">
-                    {entry.image && (
-                      <Image
-                        src={urlFor(entry.image).width(1200).height(800).url()}
-                        alt={`Cover image for ${entry.title}`}
-                        fill
-                        sizes="(max-w-6xl) 100vw, 50vw"
-                        className="object-cover w-full h-full scale-[1.1] will-change-transform"
-                      />
-                    )}
-                    {/* Мягкий оверлей при наведении */}
+{entry.image && entry.image.asset && (
+  <div className="parallax-img-wrap aspect-[16/10] w-full bg-[#FAF7F2] mb-8 overflow-hidden relative border border-[#EFEBE3]">
+    <Image
+      src={urlFor(entry.image).width(1200).height(800).url()}
+      alt={`Cover image for ${entry.title}`}
+      fill
+      sizes="(max-width: 1200px) 100vw, 50vw"
+      className="object-cover w-full h-full scale-[1.1] will-change-transform"
+    />
+    <div className="absolute inset-0 bg-[#3B533E]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+  </div>
+)}
                     <div className="absolute inset-0 bg-[#3B533E]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
 
@@ -275,9 +277,9 @@ export default function LifestyleJournal({ lifestylePosts }: LifestyleProps) {
 export const getStaticProps: GetStaticProps = async ({ locale }) => {
   const lang = locale || "en";
 
-  const query = `*[_type == "post" && category->title == "Lifestyle & Performance" && language == $lang] | order(date desc) {
+  const query = `*[_type == "post" && (category->title match "Lifestyle*" || category->title == "Lifestyle & Performance") && language == $lang] | order(date desc) {
     "id": _id,
-    "category": category->title,
+    "category": coalesce(category->title, "Lifestyle"),
     title,
     excerpt,
     "slug": slug.current,
